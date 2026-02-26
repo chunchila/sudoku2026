@@ -69,6 +69,28 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, system-ui, sans-serif);
+  min-height: 100dvh;
+}
+
+html:has(.bg-theme-ocean) body,
+html:has(.bg-theme-sunset) body,
+html:has(.bg-theme-forest) body,
+html:has(.bg-theme-aurora) body,
+html:has(.bg-theme-cherry) body,
+html:has(.bg-theme-midnight) body {
+  background: transparent;
+  color: #f1f5f9;
+}
+
+html:has(.bg-theme-ocean) .bg-card,
+html:has(.bg-theme-sunset) .bg-card,
+html:has(.bg-theme-forest) .bg-card,
+html:has(.bg-theme-aurora) .bg-card,
+html:has(.bg-theme-cherry) .bg-card,
+html:has(.bg-theme-midnight) .bg-card {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 @keyframes fade-in {
@@ -116,4 +138,77 @@ body {
 
 .animate-confetti {
   animation: confetti-fall 3s ease-in forwards;
+}
+
+/* ── Background themes ── */
+
+@keyframes bg-aurora {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes bg-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 40px) scale(1.05); }
+}
+
+@keyframes bg-float-reverse {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-40px, 30px) scale(1.08); }
+  50% { transform: translate(30px, -20px) scale(0.92); }
+  75% { transform: translate(-20px, -40px) scale(1.04); }
+}
+
+@keyframes bg-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.bg-theme-ocean {
+  background: linear-gradient(135deg, #0c4a6e, #1e3a5f, #312e81, #1e1b4b);
+}
+.dark .bg-theme-ocean {
+  background: linear-gradient(135deg, #0c4a6e, #1e3a5f, #312e81, #0f172a);
+}
+
+.bg-theme-sunset {
+  background: linear-gradient(135deg, #7c2d12, #9a3412, #831843, #4c1d95);
+}
+.dark .bg-theme-sunset {
+  background: linear-gradient(135deg, #431407, #6b2121, #4a1942, #2e1065);
+}
+
+.bg-theme-forest {
+  background: linear-gradient(135deg, #064e3b, #065f46, #134e4a, #1e3a5f);
+}
+.dark .bg-theme-forest {
+  background: linear-gradient(135deg, #022c22, #064e3b, #0f3b3a, #0f172a);
+}
+
+.bg-theme-aurora {
+  background: linear-gradient(270deg, #6366f1, #06b6d4, #8b5cf6, #ec4899, #6366f1);
+  background-size: 300% 300%;
+  animation: bg-aurora 12s ease infinite;
+}
+.dark .bg-theme-aurora {
+  background: linear-gradient(270deg, #3730a3, #0e7490, #5b21b6, #9d174d, #3730a3);
+  background-size: 300% 300%;
+  animation: bg-aurora 12s ease infinite;
+}
+
+.bg-theme-cherry {
+  background: linear-gradient(135deg, #881337, #9f1239, #701a75, #4c1d95);
+}
+.dark .bg-theme-cherry {
+  background: linear-gradient(135deg, #4c0519, #6b1030, #4a044e, #2e1065);
+}
+
+.bg-theme-midnight {
+  background: linear-gradient(135deg, #0f172a, #1e1b4b, #1e293b, #172554);
+}
+.dark .bg-theme-midnight {
+  background: linear-gradient(135deg, #020617, #0f0e2e, #0f172a, #0a1628);
 }

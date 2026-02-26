@@ -91,6 +91,123 @@ function formatTime(seconds: number): string {
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
+const BACKGROUNDS = [
+  { id: "none", label: "None", preview: "bg-background", class: "" },
+  { id: "ocean", label: "Ocean", preview: "bg-gradient-to-br from-blue-900 to-indigo-950", class: "bg-theme-ocean" },
+  { id: "sunset", label: "Sunset", preview: "bg-gradient-to-br from-orange-900 to-purple-950", class: "bg-theme-sunset" },
+  { id: "forest", label: "Forest", preview: "bg-gradient-to-br from-emerald-900 to-teal-950", class: "bg-theme-forest" },
+  { id: "aurora", label: "Aurora", preview: "bg-gradient-to-br from-indigo-600 to-pink-600", class: "bg-theme-aurora" },
+  { id: "cherry", label: "Cherry", preview: "bg-gradient-to-br from-rose-900 to-purple-950", class: "bg-theme-cherry" },
+  { id: "midnight", label: "Midnight", preview: "bg-gradient-to-br from-slate-900 to-indigo-950", class: "bg-theme-midnight" },
+] as const;
+
+type BgId = (typeof BACKGROUNDS)[number]["id"];
+
+function useBackground() {
+  const [bgId, setBgId] = useState<BgId>("none");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("sudoku-bg") as BgId | null;
+      if (saved && BACKGROUNDS.some((b) => b.id === saved)) setBgId(saved);
+    } catch {}
+  }, []);
+
+  const set = (id: BgId) => {
+    setBgId(id);
+    try { localStorage.setItem("sudoku-bg", id); } catch {}
+  };
+
+  return { bgId, setBg: set };
+}
+
+function BackgroundLayer({ bgId }: { bgId: BgId }) {
+  const bg = BACKGROUNDS.find((b) => b.id === bgId);
+  if (!bg || bg.id === "none") return null;
+
+  return (
+    <div className="fixed inset-0 -z-10 transition-all duration-700">
+      <div className={`absolute inset-0 ${bg.class}`} />
+      <div
+        className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-3xl"
+        style={{
+          top: "10%",
+          left: "15%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%)",
+          animation: "bg-float 20s ease-in-out infinite",
+        }}
+      />
+      <div
+        className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-3xl"
+        style={{
+          bottom: "10%",
+          right: "10%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.1), transparent 70%)",
+          animation: "bg-float-reverse 25s ease-in-out infinite",
+        }}
+      />
+    </div>
+  );
+}
+
+function BackgroundPicker({ bgId, onSelect }: { bgId: BgId; onSelect: (id: BgId) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`p-2.5 rounded-xl border text-foreground transition-all active:scale-95 cursor-pointer ${
+          bgId !== "none"
+            ? "bg-accent/15 border-accent/40 hover:bg-accent/25"
+            : "bg-card border-card-border hover:bg-cell-hover"
+        }`}
+        aria-label="Change background"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 bg-card border border-card-border rounded-2xl p-3 shadow-xl animate-scale-in z-50 w-52">
+          <p className="text-xs text-muted font-medium mb-2 px-1">Background</p>
+          <div className="grid grid-cols-4 gap-2">
+            {BACKGROUNDS.map((bg) => (
+              <button
+                key={bg.id}
+                onClick={() => { onSelect(bg.id); setOpen(false); }}
+                className={`group relative w-10 h-10 rounded-xl border-2 transition-all cursor-pointer overflow-hidden ${
+                  bgId === bg.id
+                    ? "border-accent scale-110 shadow-md"
+                    : "border-card-border hover:border-muted hover:scale-105"
+                }`}
+                aria-label={bg.label}
+                title={bg.label}
+              >
+                {bg.id === "none" ? (
+                  <div className="w-full h-full bg-background flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                  </div>
+                ) : (
+                  <div className={`w-full h-full ${bg.preview}`} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ThemeToggle() {
   const [dark, setDark] = useState(false);
 
@@ -148,21 +265,34 @@ function ConfettiEffect() {
   );
 }
 
+function SettingsBar({ bgId, onBgSelect }: { bgId: BgId; onBgSelect: (id: BgId) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <BackgroundPicker bgId={bgId} onSelect={onBgSelect} />
+      <ThemeToggle />
+    </div>
+  );
+}
+
 function DifficultySelector({
   onSelect,
   onContinue,
   savedGame,
+  bgId,
+  onBgSelect,
 }: {
   onSelect: (d: Difficulty) => void;
   onContinue: () => void;
   savedGame: SavedGame | null;
+  bgId: BgId;
+  onBgSelect: (id: BgId) => void;
 }) {
   const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-fade-in">
       <div className="fixed top-4 right-4 z-10">
-        <ThemeToggle />
+        <SettingsBar bgId={bgId} onBgSelect={onBgSelect} />
       </div>
       <div className="mb-12 text-center">
         <h1 className="text-5xl font-bold tracking-tight mb-3">
@@ -492,6 +622,7 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [savedSnapshot, setSavedSnapshot] = useState<SavedGame | null>(null);
+  const { bgId, setBg } = useBackground();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isRestoringRef = useRef(false);
 
@@ -717,12 +848,19 @@ export default function Home() {
   }, [gameState, handleNumber, handleErase, selectedCell]);
 
   if (gameState === "menu") {
-    return <DifficultySelector onSelect={startGame} onContinue={resumeGame} savedGame={savedSnapshot} />;
+    return (
+      <>
+        <BackgroundLayer bgId={bgId} />
+        <DifficultySelector onSelect={startGame} onContinue={resumeGame} savedGame={savedSnapshot} bgId={bgId} onBgSelect={setBg} />
+      </>
+    );
   }
 
   const config = DIFFICULTY_CONFIG[difficulty];
 
   return (
+    <>
+    <BackgroundLayer bgId={bgId} />
     <div className="flex flex-col items-center min-h-screen p-4 sm:p-6">
       {/* Header */}
       <div className="w-full max-w-md flex items-center justify-between mb-4 animate-fade-in">
@@ -741,7 +879,7 @@ export default function Home() {
             />
             <span className="font-medium text-sm">{config.label}</span>
           </div>
-          <ThemeToggle />
+          <SettingsBar bgId={bgId} onBgSelect={setBg} />
         </div>
       </div>
 
@@ -803,5 +941,6 @@ export default function Home() {
         />
       )}
     </div>
+    </>
   );
 }

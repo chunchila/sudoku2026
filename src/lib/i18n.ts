@@ -49,6 +49,7 @@ interface Translations {
   hard: string;
   expert: string;
   mistakeCount: (n: number) => string;
+  deleteSave: string;
 }
 
 const en: Translations = {
@@ -92,6 +93,7 @@ const en: Translations = {
   hard: "Hard",
   expert: "Expert",
   mistakeCount: (n) => `${n} mistake${n !== 1 ? "s" : ""}`,
+  deleteSave: "Delete saved game",
 };
 
 const ru: Translations = {
@@ -139,6 +141,7 @@ const ru: Translations = {
     if (n >= 2 && n <= 4) return `${n} ошибки`;
     return `${n} ошибок`;
   },
+  deleteSave: "Удалить сохранение",
 };
 
 const de: Translations = {
@@ -182,6 +185,7 @@ const de: Translations = {
   hard: "Schwer",
   expert: "Experte",
   mistakeCount: (n) => `${n} Fehler`,
+  deleteSave: "Spielstand löschen",
 };
 
 const ja: Translations = {
@@ -225,6 +229,7 @@ const ja: Translations = {
   hard: "むずかしい",
   expert: "エキスパート",
   mistakeCount: (n) => `${n}ミス`,
+  deleteSave: "セーブデータを削除",
 };
 
 const fr: Translations = {
@@ -268,6 +273,7 @@ const fr: Translations = {
   hard: "Difficile",
   expert: "Expert",
   mistakeCount: (n) => `${n} erreur${n !== 1 ? "s" : ""}`,
+  deleteSave: "Supprimer la sauvegarde",
 };
 
 const translations: Record<LangCode, Translations> = { en, ru, de, ja, fr };

@@ -231,8 +231,8 @@ function SettingsBar({ bgId, onBgSelect, lang, onLangSelect }: { bgId: BgId; onB
 
 // ── Screens ──
 
-function DifficultySelector({ onSelect, onContinue, savedGame, bgId, onBgSelect, lang, onLangSelect }: {
-  onSelect: (d: Difficulty) => void; onContinue: () => void; savedGame: SavedGame | null;
+function DifficultySelector({ onSelect, onContinue, onDeleteSave, savedGame, bgId, onBgSelect, lang, onLangSelect }: {
+  onSelect: (d: Difficulty) => void; onContinue: () => void; onDeleteSave: () => void; savedGame: SavedGame | null;
   bgId: BgId; onBgSelect: (id: BgId) => void; lang: LangCode; onLangSelect: (code: LangCode) => void;
 }) {
   const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
@@ -251,25 +251,35 @@ function DifficultySelector({ onSelect, onContinue, savedGame, bgId, onBgSelect,
       </div>
 
       {savedGame && (
-        <button onClick={onContinue} className="w-full max-w-lg mb-6 group relative overflow-hidden rounded-2xl bg-accent/10 border-2 border-accent/40 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-accent cursor-pointer">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-              <div>
-                <span className="font-semibold text-lg text-accent">{tr.continueGame}</span>
-                <div className="flex items-center gap-3 text-sm text-muted mt-0.5">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: DIFFICULTY_CONFIG[savedGame.difficulty].color }} />
-                    {getDifficultyLabel(lang, savedGame.difficulty)}
-                  </span>
-                  <span className="font-mono">{formatTime(savedGame.elapsed)}</span>
-                  <span>{tr.mistakeCount(savedGame.mistakes)}</span>
+        <div className="w-full max-w-lg mb-6 relative">
+          <button onClick={onContinue} className="w-full group relative overflow-hidden rounded-2xl bg-accent/10 border-2 border-accent/40 p-5 pr-14 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-accent cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                <div>
+                  <span className="font-semibold text-lg text-accent">{tr.continueGame}</span>
+                  <div className="flex items-center gap-3 text-sm text-muted mt-0.5">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: DIFFICULTY_CONFIG[savedGame.difficulty].color }} />
+                      {getDifficultyLabel(lang, savedGame.difficulty)}
+                    </span>
+                    <span className="font-mono">{formatTime(savedGame.elapsed)}</span>
+                    <span>{tr.mistakeCount(savedGame.mistakes)}</span>
+                  </div>
                 </div>
               </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-accent transition-colors"><path d="m9 18 6-6-6-6"/></svg>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-accent transition-colors"><path d="m9 18 6-6-6-6"/></svg>
-          </div>
-        </button>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDeleteSave(); }}
+            className="absolute top-3 right-3 p-2 rounded-xl text-muted hover:text-error hover:bg-error/10 transition-all active:scale-90 cursor-pointer z-10"
+            aria-label={tr.deleteSave}
+            title={tr.deleteSave}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
@@ -577,7 +587,7 @@ export default function Home() {
     return (
       <>
         <BackgroundLayer bgId={bgId} />
-        <DifficultySelector onSelect={startGame} onContinue={resumeGame} savedGame={savedSnapshot} bgId={bgId} onBgSelect={setBg} lang={lang} onLangSelect={setLang} />
+        <DifficultySelector onSelect={startGame} onContinue={resumeGame} onDeleteSave={() => { clearSave(); setSavedSnapshot(null); }} savedGame={savedSnapshot} bgId={bgId} onBgSelect={setBg} lang={lang} onLangSelect={setLang} />
       </>
     );
   }
